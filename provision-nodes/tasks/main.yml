@@ -45,18 +45,21 @@
   vars:
     iface_name: "{{data_iface}}"
     as_fact: "data_addr"
+  when: (data_iface | default('')) != ''
 - include_role:
     name: get-iface-addr
   vars:
     iface_name: "{{api_iface}}"
     as_fact: "api_addr"
+  when: (api_iface | default('')) != ''
 - include_role:
     name: setup-web-proxy
+  when: (proxy_env | default({})) != {}
 - include_role:
     name: add-local-repository
   vars:
     yum_repository: "{{yum_repo_url}}"
-  when: yum_repo_url is defined
+  when: (yum_repo_url | default('')) != ''
 - include_role:
     name: install-packages
   vars:
