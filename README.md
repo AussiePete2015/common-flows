@@ -18,8 +18,8 @@ This will create a `common-flows` subdirectory, then clone this repository into 
 
 ```yaml
 [submodule "common-roles"]
-	path = common-flows
-	url = https://github.com/Datanexus/common-flows
+    path = common-flows
+    url = https://github.com/Datanexus/common-flows
 ```
 
 Once the `common-roles` repository has been added as a submodule, the next step is to add the `common-roles` directory to the `roles_path` used by Ansible.  This can be accomplished by creating an `ansible.cfg` file in the same directory as the playbook that will be run that looks something like this:
