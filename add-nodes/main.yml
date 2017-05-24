@@ -1,0 +1,18 @@
+# (c) 2017 DataNexus Inc.  All Rights Reserved
+---
+# first check each node and see which already have an instance of our
+# application service deployed to them
+- name: Check for the {{application}} service on our target nodes
+  command: "systemctl status {{application}}"
+  args:
+    warn: no
+  register: service_status_out
+  failed_when:
+    - service_status_out.rc != 0
+    - ("could not be found" not in service_status_out.stderr)
+# then deploy the named application to the nodes that don't have an
+# instance of that service available locally
+- name: Deploy to the nodes that don't have a local instance
+  include_role:
+    name: provision-nodes
+  when: ("could not be found" in service_status_out.stderr)
