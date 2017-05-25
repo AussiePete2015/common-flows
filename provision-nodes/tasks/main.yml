@@ -1,30 +1,5 @@
 # (c) 2017 DataNexus Inc.  All Rights Reserved
 ---
-# first, load the local variables file (if one was defined); this will
-# initialize the variables used in our playbook (and override any values from
-# the 'vars/{{application}}.yml' if those values are redefined values in the
-# 'local_vars_file' we're loading here)
-- name: Load local variables file (if defined)
-  include_vars:
-    file: "{{local_vars_file}}"
-  when: not (local_vars_file is undefined or local_vars_file is none or local_vars_file | trim == '')
-# then, restart the network (unless the skip_network_restart was set)
-# and gather some facts about our input node(s)
-- name: Ensure the network interfaces are up on our input node(s)
-  service:
-    name: network
-    state: restarted
-  become: true
-  when: not (skip_network_restart is defined or skip_network_restart)
-- name: Gather facts from the input node(s)
-  setup:
-# next, we obtain the interface names for our data_iface
-# and api_iface (provided an interface description was provided for each)
-- include_role:
-    name: get-iface-names
-  vars:
-    iface_descriptions: "{{iface_description_array}}"
-  when: not (iface_description_array is undefined or iface_description_array == [])
 # if we're provisioning a RHEL machine, then we need to ensure that
 # it's subscribed before we can install anything (if it hasn't been
 # registered already, of course, if that's the case then we can skip
