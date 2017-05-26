@@ -22,7 +22,6 @@
 - set_fact:
     "{{application}}_nodes": "{{ansible_play_hosts | difference(existing_nodes)}}"
     existing_node_count: "{{existing_nodes | count}}"
-  when: ("could not be found" in service_status_out.stderr)
 # then deploy the named application to the nodes that don't have an
 # instance of that service available locally
 - name: Deploy {{application}} to the nodes that don't have a local instance

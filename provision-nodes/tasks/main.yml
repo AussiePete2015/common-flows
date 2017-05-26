@@ -40,4 +40,4 @@
   vars:
     package_list: "{{combined_package_list}}"
 - include_role:
-    name: "dn-{{application}}"
+    name: "dn-{{application_deployed | default(application)}}"
