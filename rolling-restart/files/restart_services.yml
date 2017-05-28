@@ -1,0 +1,17 @@
+# (c) 2016 DataNexus Inc.  All Rights Reserved
+---
+# start up the input services, then pause for a configurable amount
+# of time before returning (unless the `last_host` parameter is set
+# to true)
+- name: Restart the named services for {{current_host}}
+  service:
+    name: "{{service_name}}"
+    state: restarted
+  with_items: "{{restart_service_list | default([application])}}"
+  loop_control:
+    loop_var: service_name
+  become: true
+- name: Pause for {{seconds_between_hosts | default(5)}} seconds between hosts
+  pause:
+    seconds: "{{seconds_between_hosts | default(5)}}"
+  when: not (current_host == last_host)

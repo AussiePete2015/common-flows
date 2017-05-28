@@ -1,0 +1,17 @@
+# (c) 2016 DataNexus Inc.  All Rights Reserved
+---
+# Perform a rolling restart of the named services across all of
+# the hosts in the `target_nodes` list; this is done by restarting the
+# named services on each node in the target host list, individually,
+# then pausing for a configurable amount of time between nodes
+- set_fact:
+    last_host: "{{target_nodes[(target_nodes|length)-1]}}"
+- name: Rolling restart of services across the named nodes
+  include: ../files/restart_services.yml static=no
+  vars:
+    restart_service_list: "{{service_list | default([application])}}"
+  delegate_to: "{{current_host}}"
+  run_once: true
+  with_items: "{{target_nodes}}"
+  loop_control:
+    loop_var: current_host
