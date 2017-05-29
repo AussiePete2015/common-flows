@@ -20,8 +20,8 @@
 # (a filtered version of the nodes list for this application type and the
 # number of nodes in the current cluster/ensemble)
 - set_fact:
-    "{{application}}_nodes": "{{ansible_play_hosts | difference(existing_nodes)}}"
-    existing_node_count: "{{existing_nodes | count}}"
+    "{{application}}_nodes": "{{ansible_play_hosts | difference(existing_nodes | default([]))}}"
+    existing_node_count: "{{(existing_nodes | default([])) | count}}"
 # then deploy the named application to the nodes that don't have an
 # instance of that service available locally
 - name: Deploy {{application_deployed | default(application)}} to the nodes that don't have a local instance
