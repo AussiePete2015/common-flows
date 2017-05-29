@@ -1,9 +1,9 @@
 # (c) 2017 DataNexus Inc.  All Rights Reserved
 ---
-# first check each node and see which already have an instance of our
-# application service deployed to them
-- name: Check for the {{application}} service on our target nodes
-  command: "systemctl status {{application}}"
+# first check each node and see which already have an instance of (one of?) our
+# application's service(s) deployed to them
+- name: Check for the {{application_deployed | default(application)}} service(s) on our target nodes
+  command: "systemctl status {{service_deployed | default(application)}}"
   args:
     warn: no
   register: service_status_out
@@ -11,7 +11,7 @@
     - service_status_out.rc != 0
     - ("could not be found" not in service_status_out.stderr)
 # build a list of the hosts that are part of the current cluster/ensemble
-- name: Build list of hosts that already have the {{application}} service deployed locally
+- name: Build list of hosts that already have the {{application_deployed | default(application)}} service(s) deployed locally
   set_fact:
     existing_nodes: "{{(existing_nodes | default([]))}} + [ '{{item}}' ]"
   with_items: "{{ansible_play_hosts}}"
@@ -24,7 +24,7 @@
     existing_node_count: "{{existing_nodes | count}}"
 # then deploy the named application to the nodes that don't have an
 # instance of that service available locally
-- name: Deploy {{application}} to the nodes that don't have a local instance
+- name: Deploy {{application_deployed | default(application)}} to the nodes that don't have a local instance
   include_role:
     name: provision-nodes
   when: ("could not be found" in service_status_out.stderr)
