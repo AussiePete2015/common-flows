@@ -6,15 +6,13 @@
 # the `target_nodes` list
 - block:
   - name: Rolling restart of services across the named nodes
-    include: ../files/run_restart_command.yml static=no
-    vars:
-      api_addr: "{{hostvars[current_host].api_addr}}"
+    local_action: shell ssh -i '{{hostvars[current_host].ansible_ssh_private_key_file}}' -p '{{hostvars[current_host].ansible_ssh_port}}' {{hostvars[current_host].ansible_user}}@{{hostvars[current_host].ansible_ssh_host}} '{{hostvars[current_host].restart_command}}'
     delegate_to: "{{current_host}}"
     run_once: true
     with_items: "{{target_nodes}}"
     loop_control:
       loop_var: current_host
-  when: command_included is defined and command_included
+  when: restart_command_provided is defined and restart_command_provided
 # If a `rolling_restart_command` is not provided, then this task will just
 # restart the services listed in the input `service_list` parameter.  It should
 # be noted here that if a `service_list` is not provided, this task will just
@@ -36,4 +34,4 @@
     with_items: "{{target_nodes}}"
     loop_control:
       loop_var: current_host
-  when: command_included is undefined or not(command_included)
+  when: restart_command_provided is undefined or not(restart_command_provided)
