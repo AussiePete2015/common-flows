@@ -1,17 +1,39 @@
 # (c) 2016 DataNexus Inc.  All Rights Reserved
 ---
 # Perform a rolling restart of the named services across all of
-# the hosts in the `target_nodes` list; this is done by restarting the
-# named services on each node in the target host list, individually,
-# then pausing for a configurable amount of time between nodes
-- set_fact:
-    last_host: "{{target_nodes[(target_nodes|length)-1]}}"
-- name: Rolling restart of services across the named nodes
-  include: ../files/restart_services.yml static=no
-  vars:
-    restart_service_list: "{{service_list | default([application])}}"
-  delegate_to: "{{current_host}}"
-  run_once: true
-  with_items: "{{target_nodes}}"
-  loop_control:
-    loop_var: current_host
+# the hosts in the `target_nodes` list; if a `rolling_restart_command`
+# is provided, then this task will run that command on all nodes in
+# the `target_nodes` list
+- block:
+  - name: Rolling restart of services across the named nodes
+    include: ../files/run_restart_command.yml static=no
+    vars:
+      api_addr: "{{hostvars[current_host].api_addr}}"
+    delegate_to: "{{current_host}}"
+    run_once: true
+    with_items: "{{target_nodes}}"
+    loop_control:
+      loop_var: current_host
+  when: command_included is defined and command_included
+# If a `rolling_restart_command` is not provided, then this task will just
+# restart the services listed in the input `service_list` parameter.  It should
+# be noted here that if a `service_list` is not provided, this task will just
+# restart the service who's name corresponds to the `application` defined in
+# the playbook that this task is being run from.  Once the service has been,
+# restarted, the task will then pause for a fixed number of seconds before
+# moving on to the next node in the `target_nodes` list (configurable using 
+# the `seconds_between_hosts` parameter, which defaults to 5 seconds if not
+# specified)
+- block:
+  - set_fact:
+      last_host: "{{target_nodes[(target_nodes|length)-1]}}"
+  - name: Rolling restart of services across the named nodes
+    include: ../files/restart_services.yml static=no
+    vars:
+      restart_service_list: "{{service_list | default([application])}}"
+    delegate_to: "{{current_host}}"
+    run_once: true
+    with_items: "{{target_nodes}}"
+    loop_control:
+      loop_var: current_host
+  when: command_included is undefined or not(command_included)

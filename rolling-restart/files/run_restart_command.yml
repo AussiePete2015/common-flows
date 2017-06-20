@@ -1,0 +1,4 @@
+# (c) 2016 DataNexus Inc.  All Rights Reserved
+---
+- name: Execute restart command for {{current_host}}
+  local_action: shell ssh -i '{{hostvars[current_host].ansible_ssh_private_key_file}}' -p '{{hostvars[current_host].ansible_ssh_port}}' {{hostvars[current_host].ansible_user}}@{{hostvars[current_host].ansible_ssh_host}} '{{rolling_restart_command}}'
