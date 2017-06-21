@@ -13,8 +13,10 @@
     become: true
     when: rhel_username is defined and rhel_password is defined and rhel_consumer_id is defined
   when: ansible_distribution == 'RedHat'
-# Now that we have all of the facts we need, we can run the roles that are used to
-# deploy and configure the application we're deploying on our input nodes
+# Now that we have all of the facts we need, we can run the roles that are used
+# to deploy and configure the application we're deploying on our input nodes;
+# first get values for the addresses of the `data_iface` and `api_iface`
+# (if defined)
 - include_role:
     name: get-iface-addr
   vars:
@@ -27,17 +29,37 @@
     iface_name: "{{api_iface}}"
     as_fact: "api_addr"
   when: (api_iface | default('')) != ''
+# then, setup the web proxy (if a proxy_env hash was defined)
 - include_role:
     name: setup-web-proxy
   when: (proxy_env | default({})) != {}
+# add a local YUM repository (if the `yum_repo_url` is defined)
 - include_role:
     name: add-local-repository
   vars:
     yum_repository: "{{yum_repo_url}}"
   when: (yum_repo_url | default('')) != ''
+# install the packages in the input package list from the standard YUM
+# repository
 - include_role:
     name: install-packages
   vars:
     package_list: "{{combined_package_list}}"
+# and setup mirror for EPEL repository (if defined)
+- include_role:
+    name: add-local-repository
+  vars:
+    yum_repository: "{{epel_repo_url}}"
+    repository_name: epel
+    regex_repl_vals:
+        baseurl:
+          regex: '^#?(baseurl=)(http[s]?://[^\/]+\/[^0-9]*)(\/.*)$'
+          replx: "\\g<1>{{yum_repository}}\\g<3>"
+        mirrorlist:
+          regex: "^(mirrorlist=http[s]?://mirrors.fedoraproject.org/.*)$"
+          eplx: "#\\g<1>"
+  when: (epel_repo_url | default('')) != ''
+# now that we've completed the setup, we can call the appropriate role to
+# deploy the application to our target nodes
 - include_role:
     name: "dn-{{application_deployed | default(application)}}"
