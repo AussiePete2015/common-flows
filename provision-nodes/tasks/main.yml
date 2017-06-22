@@ -37,8 +37,8 @@
 - include_role:
     name: add-local-repository
   vars:
-    yum_repository: "{{yum_repo_url}}"
-  when: (yum_repo_url | default('')) != ''
+    yum_repository: "{{yum_repo_url | default('')}}"
+  when: (yum_repo_url | default('')) != '' or (reset_mirrors | default(false))
 # install the packages in the input package list from the standard YUM
 # repository
 - include_role:
@@ -49,7 +49,7 @@
 - include_role:
     name: add-local-repository
   vars:
-    yum_repository: "{{epel_repo_url}}"
+    yum_repository: "{{epel_repo_url | default('')}}"
     repository_name: epel
     regex_repl_vals:
         baseurl:
@@ -58,7 +58,7 @@
         mirrorlist:
           regex: "^(mirrorlist=http[s]?://mirrors.fedoraproject.org/.*)$"
           eplx: "#\\g<1>"
-  when: (epel_repo_url | default('')) != ''
+  when: (epel_repo_url | default('')) != '' or (reset_mirrors | default(false))
 # now that we've completed the setup, we can call the appropriate role to
 # deploy the application to our target nodes
 - include_role:
