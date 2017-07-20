@@ -1,0 +1,9 @@
+# (c) 2017 DataNexus Inc.  All Rights Reserved
+---
+# first, perform the (application-specific) tasks needed to secure the cluster
+- include_role:
+    name: secure-{{application}}-cluster
+# then perform a rolling-restart of the cluster to ensure the configuration
+# changes made to secure the cluster are picked up
+- include_role:
+    name: rolling-restart

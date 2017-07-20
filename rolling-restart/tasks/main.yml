@@ -28,7 +28,7 @@
   - name: Rolling restart of services across the named nodes
     include: ../files/restart_services.yml static=no
     vars:
-      restart_service_list: "{{service_list | default([application])}}"
+      restart_service_list: "{{hostvars[current_host]['service_list'] | default([application])}}"
     delegate_to: "{{current_host}}"
     run_once: true
     with_items: "{{target_nodes}}"
