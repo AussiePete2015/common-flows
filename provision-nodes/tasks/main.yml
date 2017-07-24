@@ -13,22 +13,6 @@
     become: true
     when: rhel_username is defined and rhel_password is defined and rhel_consumer_id is defined
   when: ansible_distribution == 'RedHat'
-# Now that we have all of the facts we need, we can run the roles that are used
-# to deploy and configure the application we're deploying on our input nodes;
-# first get values for the addresses of the `data_iface` and `api_iface`
-# (if defined)
-- include_role:
-    name: get-iface-addr
-  vars:
-    iface_name: "{{data_iface}}"
-    as_fact: "data_addr"
-  when: (data_iface | default('')) != ''
-- include_role:
-    name: get-iface-addr
-  vars:
-    iface_name: "{{api_iface}}"
-    as_fact: "api_addr"
-  when: (api_iface | default('')) != ''
 # then, setup the web proxy (if a proxy_env hash was defined)
 - include_role:
     name: setup-web-proxy
